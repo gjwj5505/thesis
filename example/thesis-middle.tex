@@ -5,10 +5,11 @@
 % Add your packages here, e.g.,
 % \usepackage{tikz}
 \usepackage{siunitx}
+\usepackage{stackengine}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
 
-% For lorem ipsum; remove these lines when writing your thesis
-\usepackage{lipsum}
-\usepackage{jiwonlipsum}
 
 % hyperref *must* be the last package to be loaded!
 \usepackage[pdfusetitle]{hyperref}
@@ -26,83 +27,118 @@
 \koreankeywords{정적 분석, 프로그램 합성, 요약 해석, 난독화}
 \englishkeywords{Static Analysis, Program Synthesis, Abstract Interpretation, Obfuscation}
 
+\newcommand{\alt}[2]{#1\textsubscript{\ensuremath{\text{\scriptsize\textit{#2}}}}}
 
 \begin{document}
 \maketitle
 
 \pagenumbering{roman}
 \begin{abstract}
-  요약
+프로그래밍 언어와 그 실행 의미, 정적 분석기가 주어졌을 때 정적 분석기가 무의미한 결론을 내리게 하는 입력 프로그램을 합성한다.
+무의미한 결론이라 함은, 프로그램의 특정 위치에서 특정 변수가 가질 수 있는 값에 대한 정보가 아무것도 없는 것을 의미한다.
+본 연구에서는 적은 종류의 규칙을 가지는 G 언어와 그에 해당하는 한 정적 분석기를 고정하여 분석기에 대한 공격을 시도한다.
+이러한 공격이 왜 항상 가능한지 증명하고, 전탐색에 기반한 방법으로 실제 공격 예시를 제시한다.
+이후 프로그램 합성 기법을 이용하여 유의미한 실행 시간 안에 공격을 시도한다. 
+이 공격의 결과 통해 정적 분석기의 불완전한 부분을 파악하여 분석기를 보완하는데 도움을 줄 수 있다.
+실행 의미는 같지만 정적 분석기가 다른 결론을 내리는 프로그램을 만들어 난독화 기법으로 사용될 수 있다.
 \end{abstract}
 
 \tableofcontents
-\listoftables
-\listoffigures
+% \listoftables
+% \listoffigures
 
-\chapter{서론}\label{chap:introduction}
+\chapter{배경 지식}\label{chap:background}
 \pagenumbering{arabic}
-본 템플릿의 구성은 다음과 같다.
-\ref{chap:body}장 본론의 \ref{sec:picture}절에서 그림의 예시를 보여준다.
-\ref{sec:table}절에서 표의 예시를 보여준다.
-\ref{chap:conclusion}장에서는 본 템플릿을 요약한다.
+\section{정적 분석}\label{sec:static_analysis}
+\section{안전함}\label{sec:soundness}
+\section{Rice의 정리}\label{sec:rices_theorem}
+\section{프로그램 합성}\label{sec:program_synthesis}
 
-\section{절 예시}\label{sec:section}
-\jiwon[2-3]
+\chapter{문제 정의}\label{chap:problem_definition}
 
+\chapter{가능성}\label{chap:possibility}
 
-\chapter{본론}\label{chap:body}
-정보 엔트로피는 각 메시지에 포함된 정보의 기댓값으로 식~\eqref{eq:entropy}\와 같다~\cite{6773024}.
-\begin{equation}\label{eq:entropy}
-  H(X) = -\sum_{i=1}^n {\mathrm{P}(x_i) \log_b \mathrm{P}(x_i)}
-\end{equation}
+\chapter{기대효과}\label{chap:expected_effects}
 
-\jiwon[4-6]
+\chapter{G 언어}\label{chap:g_language}
+\section{문법}\label{sec:syntax}
+G 언어의 문법은 다음과 같다:
 
+\[
+\begin{array}{rcl}
+P & \rightarrow & C \\[1em]
+C & \rightarrow & x := E \\
+  & \mid & C ; C \\
+  & \mid & \text{ifp } E \; C \; C \\
+  & \mid & \text{while } E \; C \\[1em]
+E & \rightarrow & n \quad (n \in \mathbb{Z}) \\
+  & \mid & x \\
+  & \mid & E \text{+} E \\
+  & \mid & E \text{*} E \\
+  & \mid & \text{-}E
+\end{array}
+\]
 
-\section{그림}\label{sec:picture}
-그림 예시는 그림~\ref{fig:example}\와 같다. 그림~\ref{fig:snu}\은 서울대학교 로고이고 그림~\ref{fig:eng}\는 서울대학교 공과대학 로고이다.
+이 때 P는 프로그램, C는 커맨드, E는 식을 의미한다. 모든 식은 정수값을 갖는다.
+\textbf{\eqref{sec:rices_theorem} \nameref{sec:rices_theorem}} 에서 사용한 전략들을 적용하기 용이한 언어로 구성하였다. 
+while 문을 통해서 튜링 완전을 확보하였다. 이 내용은 G 언어의 실행의미를 정의한 후에 더 자세히 다루겠다.
 
-\begin{figure}[htp]
-  \centering
-  \begin{subfigure}[b]{0.5\textwidth}
-    \centering
-    \includegraphics[width=0.5\textwidth]{logo1.pdf}
-    \bicaption{서울대학교 로고}{The logo of Seoul National University}\label{fig:snu}
-  \end{subfigure}%
-  \begin{subfigure}[b]{0.5\textwidth}
-    \centering
-    \includegraphics[width=0.9\textwidth]{logo2.pdf}
-    \bicaption{공과대학 로고}{The logo of College of Engineering}\label{fig:eng}
-  \end{subfigure}
-  \bicaption[그림 예시 (목차 항목)]{그림 예시.}{An example of a figure.}\label{fig:example}
-\end{figure}
-
-\jiwon[7-8]
-
-
-\section{표}\label{sec:table}
-표 예시는 표~\ref{tab:example}\과 같다.\footnote{\jiwon[12]}
-
-\begin{table}[htp]
-  \centering
-  \bicaption[표 예시 (목차 항목)]{표 예시.}{An example of a table.}\label{tab:example}
-  \begin{tblr}{cc}
-    \toprule
-    상수 & 값 \\\midrule
-    $c$ & \SI{299792458}{\meter\per\second} \\
-    $h$ & \SI{6.62607015e-34}{\joule\per\hertz} \\\bottomrule
-  \end{tblr}
-\end{table}
-
-\jiwon[9-10]
+\section{실행의미}\label{sec:semantics}
+G 언어의 실행 의미는 \alt{무엇 의미구조}{denotational semantics}로 정의한다. 실행의미가 정의되는 규칙은 다음과 같다:
 
 
+
+\begin{align*}
+  Val &= \mathbb{Z} \\
+  n &\in Val \\
+  \sigma &\in Env = Var \xrightarrow{\text{fin}} Val \\
+  x &\in Var \\
+  P, C &\in Cmd \\
+  E &\in Exp \\
+  \llbracket \cdot \rrbracket &: Cmd \rightarrow Env \rightarrow Env \\
+  &+ Exp \rightarrow Env \rightarrow Val
+\end{align*}
+
+\[
+\frac{}{\llbracket n \rrbracket \sigma = n}
+\quad\quad
+\frac{}{\llbracket x \rrbracket \sigma = \sigma(x)}x \in \text{dom}(\sigma)
+\]
+
+\[
+\frac{\llbracket E_1 \rrbracket \sigma = n_1 \quad \llbracket E_2 \rrbracket \sigma = n_2}
+     {\llbracket E_1 \text{+} E_2 \rrbracket \sigma = n_1 + n_2}
+\quad\quad
+\frac{\llbracket E_1 \rrbracket \sigma = n_1 \quad \llbracket E_2 \rrbracket \sigma = n_2}
+     {\llbracket E_1 \text{*} E_2 \rrbracket \sigma = n_1 \times n_2}
+\]
+
+\[
+\frac{\llbracket E \rrbracket \sigma = n}
+     {\llbracket \text{-}E \rrbracket \sigma = -n}
+\]
+
+이 때, 전체 프로그램의 실행의미는 $\llbracket P \rrbracket \emptyset$으로 정의된다.
+
+\chapter{분석기 고정}\label{chap:fixed_analyzer}
+
+\chapter{문제 고정}\label{chap:fixed_problem}
+
+\chapter{전탐색}\label{chap:exhaustive_search}
+\section{구현}\label{sec:implementation}
+
+\chapter{결과}\label{chap:result}
 \chapter{결론}\label{chap:conclusion}
-\jiwon[11]
 
 \printbibliography
 
 \begin{abstract}[en]
-  \lipsum[1]
+Given a programming language, its operational semantics, and a static analyzer, we synthesize an input program that causes the static analyzer to yield a meaningless conclusion.
+A meaningless conclusion refers to a state where there is no information about the possible values of a specific variable at a specific location in the program.
+In this study, we fix the G language, which has a small set of rules, and a corresponding static analyzer, to attempt an attack on the analyzer.
+We prove why such an attack is always possible and present a concrete example of the attack using a full-search-based method.
+Subsequently, we attempt the attack within a meaningful execution time using program synthesis techniques.
+The results of this attack can help identify incomplete aspects of the static analyzer, thereby aiding in its refinement.
+By creating programs that have the same operational semantics but lead to different conclusions by the static analyzer, they can be used as an obfuscation technique.
 \end{abstract}
 \end{document}
