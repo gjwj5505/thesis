@@ -9,7 +9,12 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{stmaryrd}
+\usepackage{listings}
+\usepackage{mathrsfs}
 
+
+\newtheorem{theorem}{정리}[section]
+\newtheorem{corollary}[theorem]{따름정리}
 
 % hyperref *must* be the last package to be loaded!
 \usepackage[pdfusetitle]{hyperref}
@@ -28,6 +33,7 @@
 \englishkeywords{Static Analysis, Program Synthesis, Abstract Interpretation, Obfuscation}
 
 \newcommand{\alt}[2]{#1\textsubscript{\ensuremath{\text{\scriptsize\textit{#2}}}}}
+
 
 \begin{document}
 \maketitle
@@ -50,15 +56,117 @@
 \chapter{배경 지식}\label{chap:background}
 \pagenumbering{arabic}
 \section{정적 분석}\label{sec:static_analysis}
-\section{안전함}\label{sec:soundness}
+
+정적 분석은 프로그램을 실행시키지 않고(혹은 실행시키기 전에) 프로그램의 행동 혹은 성질을 예측하는 것이다.
+프로그램의 실행은 무한할 수 있지만, 정적 분석의 실행은 무한하지 않다.
+프로그램이 입력을 받지 않고 실행되는 경우만 생각하자.
+프로그램의 성질로 정할 수 있는 것은 다양하다. 
+실행 중 에러가 나진 않는지, 프로그램이 종료되는지, 특정 줄이 실행되는지, 변수 x가 값 v를 가질 수 있는지 등이 있다.
+만약 정적 분석이 프로그램의 모든 성질을 완벽하게 예측할 수 있다면, 프로그램을 실행시킬 필요가 없어진다. 
+무한한 시간에 걸친 계산을 유한 시간 내에 끝낼 수 있게 되는 것이다.
+그러나 정지 문제는 계산 불가능한 문제이기에, 프로그램이 종료된다는 성질 하나조차 완벽하게 예측할 수 없다.
+
+
+\section{안전함과 완전함}\label{sec:soundness_completeness}
+
+프로그래밍 언어 $\mathbb{L}$과 프로그램의 성질 $\mathscr{P} \subseteq \mathbb{L}$, $\mathscr{P}$를 분석하는 정적 분석기 $\mathcal{A}$에 대해 \alt{안전함}{soundness}과 \alt{완전함}{completeness} 는 다음과 같의 정의된다:
+
+\begin{align*}
+     \mathcal{A} \text{가} \mathscr{P}\text{에 대해 안전하다} &: \forall p \in \mathbb{L}, \mathcal{A}(p) = true \implies p \in \mathscr{P} \\
+     \mathcal{A} \text{가} \mathscr{P}\text{에 대해 완전하다} &: \forall p \in \mathbb{L}, \mathcal{A}(p) = true \impliedby p \in \mathscr{P}
+\end{align*}
+
+
 \section{Rice의 정리}\label{sec:rices_theorem}
+
+\begin{theorem}[Rice's Theorem, Rice 1951]
+     $\varphi$를 부분 계산 가능한 함수들의 허용 가능한 \alt{넘버링}{admissible numbering}이라고 하자.  
+     $P \subseteq \mathbb{N}$을 어떤 성질을 만족하는 프로그램들의 인덱스 집합이라고 하자.  
+     다음 두 조건을 만족한다고 가정하자:
+     \begin{enumerate}
+     \item $P$는 \textbf{비자명(non-trivial)}하다. 즉, $P \neq \varnothing$ 이고 $P \neq \mathbb{N}$이다.
+     \item $P$는 \textbf{확장적(extensional)}이다. 즉, 모든 $m,n \in \mathbb{N}$에 대해  
+     $\varphi_m = \varphi_n$이면 $m \in P \iff n \in P$이다.
+     \end{enumerate}
+     그렇다면, $P$는 \textbf{결정 불가능(undecidable)}하다.
+\end{theorem}
+
+이 정리를 우리 문제 상황에 맞게 가공하면 다음과 같다:
+
+\begin{corollary}
+     $\mathbb{L}$을 튜링 완전한 프로그래밍 언어라고 하자. 
+     $\mathscr{P} \subseteq \mathbb{L}$을 프로그램의 부분집합, 혹은 성질이라 하자. 
+     다음 두 조건을 만족한다고 가정하자: 
+     
+     \begin{enumerate}
+     \item $\mathscr{P}$는 \textbf{의미 있는 성질}이다. 즉, $\mathscr{P} \neq \varnothing$ 이고 $P \neq \mathbb{N}$이다.
+     \item $\mathscr{P}$는 \textbf{실행 의미에 딱맞는 성질}이다. 즉, $\forall p_1, p_2 \in \mathbb{L}$에 대해  
+     $p_1$과 $p_2$의 실행 의미가 같으면 $p_1 \in \mathscr{P} \iff p_2 \in \mathscr{P}$이다.
+     \end{enumerate}
+
+     그러면 다음과 같은 분석기 $\mathcal{A}$는 \textbf{존재하지 않는다}:
+     $$\forall p \in \mathbb{L}, \mathcal{A}(p) = true \iff p \in \mathscr{P}$$
+
+     다른 말로, \alt{안전}{sound}하면서 \alt{완전한}{complete} 분석기를 만들 수 없다.
+\end{corollary}
+
+
 \section{프로그램 합성}\label{sec:program_synthesis}
+중간보고서 작성 이후 작성 예정이다
 
 \chapter{문제 정의}\label{chap:problem_definition}
 
+Rice의 정리에 의해, 정적 분석기는 일반적으로 안전하면서 완전할 수 없다.
+다른 말로 만약 어떤 정적 분석기가 안전하다면, 그 분석기는 완전하지 못하게 된다.
+그 분석기가 어떤 프로그램을 입력으로 받았을 때 어떤 결함이 있는지 찾는 것이 목표이다.
+
+일관된 공격 목표를 위해 성질 $\mathscr{P}$와 안전한 분석기 $\mathcal{A}$의 결함을 다음과 같이 정의한다.
+
+
+$\mathscr{P} :=$ `변수 x가 가질 수 있는 값은 $\mathbb{Z}$ 전체가 아니다.'
+실제로 변수 x가 가질 수 있는 값이 $\mathbb{Z}$ 전체일 경우, $\mathcal{A}(p) = false$가 성립한다.(안전함의 대우)
+그러나 $\mathcal{A}(p) = false$라고 해서 실제로 변수 x가 가질 수 있는 값이 $\mathbb{Z}$ 전체인 것은 아니다.
+이런 경우 $\mathcal{A}$는 x가 가질 수 있는 값의 집합에 대해 아무 말도 하지 못한다.
+즉, $\mathcal{A}$는 x에 대해 $\top$ 이라는 결과를 내놓는다. 
+어떤 정수 $n \in \mathbb{Z}$에 대해 x $= n$일 때 에러가 나게끔 프로그램을 짰다고 생각해 보자.
+실제로는 이 프로그램에 에러가 나지 않지만 $\mathcal{A}$는 가짜 경보를 울릴 것이다.
+이것이 $\mathcal{A}$의 결함이다.
+
+이 결함의 정의에 딱 맞게 공격하기 위해서 언어 $\mathbb{L}$에 몇 가지 제약 조건을 준다. 
+\begin{enumerate}
+     \item 튜링 완전해야 한다. Rice's Theorem을 적용하기 위해서다.
+     \item 메모리와 함께 동작하고, 그 주소는 변수 이름이어야 한다. `x가 가질 수 있는 값'을 잘 다루기 위해서다.
+     \item \alt{부수적인 효과}{side effect}가 없어야 한다.
+     \item \alt{무엇 의미구조}{denotational semantics}로 그 실행 의미가 정의되어야 한다.
+\end{enumerate}
+
+이런 조건 하에서 목표를 다음과 같이 정하였다.
+
+\begin{center}
+     위 조건을 만족하는 언어 $\mathbb{L}$과 \alt{안전한}{sound} 정적 분석기 $\mathcal{A}$가 주어졌을 때,
+     변수 x를 사용하는 프로그램 $p \in \mathbb{L}$을 만들어 $\mathcal{A}$의 결함을 밝혀낸다.
+\end{center}
+
+이때 정적 분석기의 내부 구조에 접근 가능한 상태에서 화이트박스 공격을 수행한다.
+
+
 \chapter{가능성}\label{chap:possibility}
+정적 분석에 대한 공격의 가능성은 Rice Theorem에 기반한다.
+
+
+결함을 밝혀내는 프로그램 $g \in \mathbb{L}$ 이 존재하는 것과 실제로 그 프로그램을 찾는 일반적인 알고리즘을 만드는 것은 다른 문제이다.
+다행히도, 일반적인 알고리즘이 존재한다. 
+
+프로그램은 결국 문자열이고, 문자열의 집합은 셀 수 있는 집합이므로 그 부분집합인 프로그램의 집합도 셀 수 있다.
+$\mathbb{L}$에 속하는 프로그램 모두에 1부터 번호를 붙여 일대일 대응 $\mathcal{I} : \mathbb{L} \rightarrow \mathbb{N}$을 만들면, 
+$\mathcal{I}(g) \in \mathbb{N}$이다. 1번째 프로그램부터 순서대로 만들어나가면서 
+
+
+어? 안되네? i번째 프로그램을 분석기에 돌려보는건 되는데 실제로 top이 맞는지 아닌지 알 수가 없잖아.
 
 \chapter{기대효과}\label{chap:expected_effects}
+\section{분석기 보강}\label{sec:enhancement}
+\section{난독화}\label{sec:obfuscation}
 
 \chapter{G 언어}\label{chap:g_language}
 \section{문법}\label{sec:syntax}
@@ -80,55 +188,88 @@ E & \rightarrow & n \quad (n \in \mathbb{Z}) \\
 \]
 
 이 때 P는 프로그램, C는 커맨드, E는 식을 의미한다. 모든 식은 정수값을 갖는다.
-\textbf{\eqref{sec:rices_theorem} \nameref{sec:rices_theorem}} 에서 사용한 전략들을 적용하기 용이한 언어로 구성하였다. 
+\textbf{\eqref{chap:possibility} \nameref{chap:possibility}} 에서 사용한 전략들을 적용하기 용이한 언어로 구성하였다. 
 while 문을 통해서 튜링 완전을 확보하였다. 이 내용은 G 언어의 실행의미를 정의한 후에 더 자세히 다루겠다.
 
 \section{실행의미}\label{sec:semantics}
 G 언어의 실행 의미는 \alt{무엇 의미구조}{denotational semantics}로 정의한다. 실행의미가 정의되는 규칙은 다음과 같다:
 
 
-
+각 문자의 타입
 \begin{align*}
   Val &= \mathbb{Z} \\
   n &\in Val \\
-  \sigma &\in Env = Var \xrightarrow{\text{fin}} Val \\
+  M &\in Mem = Var \xrightarrow{\text{fin}} Val \\
   x &\in Var \\
   P, C &\in Cmd \\
   E &\in Exp \\
-  \llbracket \cdot \rrbracket &: Cmd \rightarrow Env \rightarrow Env \\
-  &+ Exp \rightarrow Env \rightarrow Val
+  \llbracket \cdot \rrbracket &: Cmd \rightarrow Mem \rightarrow Mem \\
+  &+ Exp \rightarrow Mem \rightarrow Val
 \end{align*}
 
-\[
-\frac{}{\llbracket n \rrbracket \sigma = n}
-\quad\quad
-\frac{}{\llbracket x \rrbracket \sigma = \sigma(x)}x \in \text{dom}(\sigma)
-\]
+$\llbracket E \rrbracket$의 의미
+\begin{align*}
+     \llbracket n \rrbracket M &= n \\
+     \llbracket x \rrbracket M &= M(x) \\
+     \llbracket E_1 \text{+} E_2 \rrbracket M &= \llbracket E_1 \rrbracket M + \llbracket E_2 \rrbracket M \\
+     \llbracket E_1 \text{*} E_2 \rrbracket M &= \llbracket E_1 \rrbracket M \times \llbracket E_2 \rrbracket M \\
+     \llbracket \text{-} E \rrbracket M &= - \llbracket E \rrbracket M\\
+\end{align*}
 
-\[
-\frac{\llbracket E_1 \rrbracket \sigma = n_1 \quad \llbracket E_2 \rrbracket \sigma = n_2}
-     {\llbracket E_1 \text{+} E_2 \rrbracket \sigma = n_1 + n_2}
-\quad\quad
-\frac{\llbracket E_1 \rrbracket \sigma = n_1 \quad \llbracket E_2 \rrbracket \sigma = n_2}
-     {\llbracket E_1 \text{*} E_2 \rrbracket \sigma = n_1 \times n_2}
-\]
-
-\[
-\frac{\llbracket E \rrbracket \sigma = n}
-     {\llbracket \text{-}E \rrbracket \sigma = -n}
-\]
+$\llbracket C \rrbracket$의 의미
+\begin{align*}
+     \llbracket x := E \rrbracket M &= M\{x \mapsto \llbracket E \rrbracket M\} \\
+     \llbracket C_1 ; C_2 \rrbracket M &= \llbracket C_2 \rrbracket (\llbracket C_1 \rrbracket M)  \\
+     \llbracket \text{ifp } E \; C_1 \; C_2 \rrbracket M &= if \; \llbracket E \rrbracket M > 0 \; then \; \llbracket C_1 \rrbracket M \; else \; \llbracket C_2 \rrbracket M \\
+     \llbracket \text{while } E \; C \rrbracket M &= lfp \; (\lambda f.if \; \llbracket E \rrbracket M > 0 \; then \; f(\llbracket C \rrbracket M) \; else \; M)
+\end{align*}
 
 이 때, 전체 프로그램의 실행의미는 $\llbracket P \rrbracket \emptyset$으로 정의된다.
 
-\chapter{분석기 고정}\label{chap:fixed_analyzer}
+$\llbracket \text{ifp } E \; C_1 \; (C_2 \; C_3) \rrbracket M = \llbracket \text{ifp } E \; C_1 \; C_2 \rrbracket M$
 
-\chapter{문제 고정}\label{chap:fixed_problem}
+G 언어는 튜링 완전한가? ...
+
+입력을 통해 만들어지는 분기가 없는 G 언어도 $\top$을 만들어내는 것이 가능하다. G 언어에 속하는 다음 프로그램을 생각하자. 
+
+\begin{lstlisting}[
+    numbers=left, % 이 블록에만 줄 번호 적용
+    numberstyle=\small,
+    basicstyle=\small\ttfamily,
+    xleftmargin=0.45\textwidth,
+    xrightmargin=0.45\textwidth
+]
+x := 0;
+while 1
+  ifp x
+    x := -x
+    x := -x + 1
+\end{lstlisting}
+
+이 프로그램을 실행하면 x의 값은 $0, 1, -1, 2, -2, 3, -3, \cdots$로 변해 간다. 
+따라서 2번 줄에서 x가 가질 수 있는 값은 $\mathbb{Z}$ 전체이다.
+어떤 요약해석이던 $\mathbb{Z}$를 요약하면 그 결과는 $\top$이 나올 수밖에 없다.
+
+
+top이 잘 나온다는걸 설명해야겠다
+denotational이 맞는가?
+
+\chapter{문제 축소}\label{chap:reduce_problem}
+
+\chapter{분석기 고정}\label{chap:fix_analyzer}
+
 
 \chapter{전탐색}\label{chap:exhaustive_search}
+
+
 \section{구현}\label{sec:implementation}
+중간보고서 작성 이후 구현 예정이다
 
 \chapter{결과}\label{chap:result}
+구현 이후 작성 예정이다
+
 \chapter{결론}\label{chap:conclusion}
+구현 이후 작성 예정이다
 
 \printbibliography
 
